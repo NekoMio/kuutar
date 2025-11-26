@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kuutar</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+      overflow: hidden;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .hero {
+      position: relative;
+      width: 90vw;
+      max-width: none;
+      transform: rotate(-5deg);
+      transition: transform 0.25s ease-out;
+    }
+
+    .hero-img {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      display: block;
+    }
+
+    .silhouette {
+      position: absolute;
+      inset: 0;
+      /* WebKit prefix for Chrome/Safari; unprefixed for Firefox/Edge */
+      -webkit-mask-image: url("./hero-transparent-full.webp");
+      mask-image: url("./hero-transparent-4k.webp");
+      -webkit-mask-size: contain;
+      mask-size: contain;
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      -webkit-mask-position: center;
+      mask-position: center;
+      transition: transform 0.3s ease-out;
+    }
+
+    .s1 {
+      z-index: -1;
+      background: oklch(0.81 0.13 351);
+    }
+
+    .s2 {
+      z-index: -2;
+      background: oklch(0.57 0.24 279);
+    }
+  </style>
+</head>
+<body>
+  <div class="hero" id="hero">
+    <img class="hero-img" src="./hero-transparent.png" alt="Hero" loading="lazy" decoding="async">
+    <div class="silhouette s1"></div>
+    <div class="silhouette s2"></div>
+  </div>
+
+  <script>
+    const hero = document.getElementById("hero");
+    const s1 = hero.querySelector(".s1");
+    const s2 = hero.querySelector(".s2");
+
+    const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+    const lerp = (a, b, t) => a + (b - a) * t;
+
+    let targetX = 0;
+    let targetY = 0;
+    let currentX = 0;
+    let currentY = 0;
+
+    const update = () => {
+      currentX = lerp(currentX, targetX, 0.08);
+      currentY = lerp(currentY, targetY, 0.08);
+
+      // Use viewport-based offsets for larger, resolution-independent motion
+      hero.style.transform = `rotate(-8deg) translate(${currentX * 5}vw, ${currentY * 3}vw)`;
+      s1.style.transform = `translate(${currentX * 7}vw, ${currentY * 4}vw)`;
+      s2.style.transform = `translate(${currentX * 12}vw, ${currentY * 8}vw)`;
+
+      requestAnimationFrame(update);
+    };
+
+    hero.addEventListener("pointermove", (e) => {
+      const rect = hero.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width;
+      const y = (e.clientY - rect.top) / rect.height;
+      targetX = clamp(x - 0.5, -0.5, 0.5);
+      targetY = clamp(y - 0.5, -0.5, 0.5);
+    });
+
+    hero.addEventListener("pointerleave", () => {
+      targetX = 0;
+      targetY = 0;
+    });
+
+    update();
+  </script>
+</body>
+</html>
