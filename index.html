@@ -55,9 +55,47 @@
       z-index: -2;
       background: oklch(0.57 0.24 279);
     }
+
+    .motion-btn {
+      position: fixed;
+      top: 12px;
+      left: 12px;
+      padding: 10px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      background: rgba(0, 0, 0, 0.35);
+      color: #fff;
+      border-radius: 999px;
+      font-size: 14px;
+      backdrop-filter: blur(12px);
+      cursor: pointer;
+      z-index: 20;
+      transition: opacity 0.2s ease;
+    }
+
+    .motion-btn.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    @media (min-width: 1025px) {
+      .motion-btn {
+        display: none;
+      }
+    }
+
+    @media (max-width: 640px) {
+      body {
+        align-items: flex-start;
+      }
+      .hero {
+        width: 140vw;
+        margin-top: 6vh;
+      }
+    }
   </style>
 </head>
 <body>
+  <button class="motion-btn" id="motion-btn">启用重力感应</button>
   <div class="hero" id="hero">
     <img class="hero-img" src="./hero-transparent-full.webp" alt="Hero" loading="lazy" decoding="async">
     <div class="silhouette s1"></div>
@@ -68,6 +106,7 @@
     const hero = document.getElementById("hero");
     const s1 = hero.querySelector(".s1");
     const s2 = hero.querySelector(".s2");
+    const motionBtn = document.getElementById("motion-btn");
 
     const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
     const lerp = (a, b, t) => a + (b - a) * t;
@@ -88,6 +127,40 @@
 
       requestAnimationFrame(update);
     };
+
+    // Device orientation (mobile) — iOS needs user gesture; Android auto-enables
+    let motionEnabled = false;
+    const ua = navigator.userAgent || "";
+    const isIOS = /iP(ad|hone|od)/.test(ua) || (ua.includes("Mac") && "ontouchend" in document);
+    const handleOrientation = (event) => {
+      if (!motionEnabled) return;
+      const gamma = clamp(event.gamma || 0, -45, 45); // left-right tilt
+      const beta = clamp(event.beta || 0, -45, 45);   // front-back tilt
+      targetX = gamma / 45 * 0.5;
+      targetY = beta / 45 * 0.5;
+    };
+
+    const enableMotion = async () => {
+      try {
+        if (typeof DeviceOrientationEvent !== "undefined" && typeof DeviceOrientationEvent.requestPermission === "function") {
+          const res = await DeviceOrientationEvent.requestPermission();
+          if (res !== "granted") return;
+        }
+        window.addEventListener("deviceorientation", handleOrientation, true);
+        motionEnabled = true;
+        motionBtn.classList.add("hidden");
+      } catch (err) {
+        console.warn("Device motion unavailable", err);
+      }
+    };
+
+    if (isIOS) {
+      motionBtn.addEventListener("click", enableMotion);
+    } else {
+      // Android and others: auto enable, hide button
+      motionBtn.classList.add("hidden");
+      enableMotion();
+    }
 
     hero.addEventListener("pointermove", (e) => {
       const rect = hero.getBoundingClientRect();
