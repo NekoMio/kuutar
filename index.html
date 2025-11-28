@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kuutar</title>
+  <link rel="preload" as="image" href="./hero-transparent-full.webp">
   <style>
     * { box-sizing: border-box; }
     html, body { margin: 0; height: 100%; }
@@ -22,6 +23,7 @@
       max-width: none;
       transform: rotate(-5deg);
       transition: transform 0.25s ease-out;
+      will-change: transform;
     }
 
     .hero-img {
@@ -35,7 +37,7 @@
       position: absolute;
       inset: 0;
       /* WebKit prefix for Chrome/Safari; unprefixed for Firefox/Edge */
-      -webkit-mask-image: url("./hero-transparent-full.webp");
+      -webkit-mask-image: url("./hero-transparent-4k.webp");
       mask-image: url("./hero-transparent-4k.webp");
       -webkit-mask-size: contain;
       mask-size: contain;
@@ -44,15 +46,18 @@
       -webkit-mask-position: center;
       mask-position: center;
       transition: transform 0.3s ease-out;
+      will-change: transform;
     }
 
     .s1 {
       z-index: -1;
+      background: #f9a8d4;
       background: oklch(0.81 0.13 351);
     }
 
     .s2 {
       z-index: -2;
+      background: #a855f7;
       background: oklch(0.57 0.24 279);
     }
 
